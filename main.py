@@ -11,7 +11,8 @@ def create_problem(
         flags=[], 
         generator=None, 
         test_params=None, 
-        output_dir=None
+        output_dir=None,
+        **kwargs
     ):
     if problem_name is None:    # infer from source file name
         problem_name = Path(source_code).stem
@@ -28,7 +29,8 @@ def create_problem(
         exec_path=problem_name, 
         generator=generator, 
         test_params=test_params, 
-        output_dir=output_dir
+        output_dir=output_dir,
+        **kwargs
     )
 
 def get_generator(handle):

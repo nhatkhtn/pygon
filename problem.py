@@ -1,5 +1,4 @@
 import time
-import random
 import logging
 import subprocess
 from pathlib import Path
@@ -7,9 +6,10 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 class Problem:
-    def __init__(self, problem_name, source_code=None, exec_path=None, generator=None, test_params=None, output_dir=None):
+    def __init__(self, problem_name, source_code=None, brute_force_exec=None, exec_path=None, generator=None, test_params=None, output_dir=None):
         self.problem_name = problem_name
         self.exec_path = exec_path
+        self.brute_force_exec = brute_force_exec
         self.generator = generator
         self.test_params = test_params
         
@@ -58,3 +58,30 @@ class Problem:
                 num_regens += 1
                 
             
+    def check(self):
+        for i, _ in enumerate(self.test_params):
+            input_name = f"{i}.in"
+            output_name = f"{i}.out"
+            checker_output_name = "checker.out"
+
+            output_path = self.output_dir / output_name
+            checker_output_path = checker_output_name
+            with open(self.output_dir / input_name, 'r', encoding='utf-8') as fin:
+                with open(checker_output_path, 'w', encoding='utf-8') as fout:
+                    start = time.time()
+                    try:
+                        subprocess.run(["python", self.brute_force_exec], stdin=fin, stdout=fout, check=True)
+                    except subprocess.CalledProcessError as err:
+                        print(f"Checker failed on test {i}")
+                        print(err)
+                    end = time.time()
+
+            try:
+                subprocess.run(["fc", str(output_path), str(checker_output_path)], check=True)
+            except subprocess.CalledProcessError as err:
+                print(err)
+                print(f"Checker returned WA on test {i}")
+                break
+
+            print(f"Test {i} finished in {end - start:.6f} seconds")
+                
